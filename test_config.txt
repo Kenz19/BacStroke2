@@ -39,3 +39,6 @@ Object_initial_conditions/Ecoli.txt
 
 # is centripetal force on? True = yes, False = no # 
 True
+
+# are boundary conditions present? #
+True
