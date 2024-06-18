@@ -22,7 +22,7 @@ class Bacteria3D(object):
     as a solid body within a clinostat.
     '''
     
-    def __init__(self, mass, position, radius, swimming_vel, organism_density):
+    def __init__(self, mass, position, radius, swimming_vel, organism_density, medium_density):
         """
         Initialises a point particle in 3D space
 
@@ -35,6 +35,7 @@ class Bacteria3D(object):
         self.pos = np.array(position, float) # bacterial position in [x,y,z], each component in m
         self.rad = float(radius) # bacterial radius in m
         self.organism_density = float(organism_density)
+        self.bouyant_mass(medium_density) # calculate the bouyant density of the bacterium in the clinostat media
         
         # initialising direction of swimming
         self.swim = float(swimming_vel) # swimming speed in m/s, float
@@ -43,8 +44,6 @@ class Bacteria3D(object):
         #print(self.swim_direction)
         #self.swim_direction = np.array([1, 2, 3])
         self.swim_vel = self.swim*self.swim_direction # swimming velocity in m/s, 3D array [vx, vy, vz]
-    
-        #print()
         
     
     def __str__(self):
@@ -57,60 +56,38 @@ class Bacteria3D(object):
         return xyz_string
     
     
-# storing old terminal velocity just in case needed
+    def bouyant_mass(self, medium_density):
+        '''
+        Calculate the bouyant mass of a bacterium inside clinostat medium
+        
+        :param medium_density: float, density in kg/m^3 for the same liquid
+        '''
+        
+        # bouyant mass assuming a spherical bacterium of constant density 
+        self.bm = (4/3)*np.pi*medium_density*(self.rad**3)*((self.organism_density/medium_density) - 1)
+        
+    
+    # storing old terminal velocity just in case needed
     def terminal_vel(self, viscosity_coeff, density, g):
         '''
         Calculates velocity at t = 0 for each bacteria instance.
         
+        It is assumed that organism is at terminal velocity at t = 0 seconds, i.e sedimentation
+        speed through the culture medium is equal to terminal velocity.
+        
         :param viscosity_coeff: float, viscosity coefficient in PaS for liquid in sim.
         :param density: float, density in kg/m^3 for the same liquid
         :param g: float, gavitational constant in kg/m^2 for desired environment
-        :param a: float, bacterial size in m
         '''   
-        # assuming to be at terminal velocity once in system (can add factor from 23/9/23 notes in not assuming this)
-        # currently only using Vt and Vd but Vs and Vr will be implemented
         
-        # as only VT acting then [x] and [z] vel will be 0
+        VTy = self.bm*g/(6*np.pi*viscosity_coeff*self.rad) # magnitude of terminal velocity
         
-        #bm = (4/3)*np.pi*density*(self.rad**3)*((1027/density) - 1)
-        
-        bm = (4/3)*np.pi*density*(self.rad**3)*((self.organism_density/density) - 1)
-        
-        VTy = bm*g/(6*np.pi*viscosity_coeff*self.rad)
-        
-        #VTy = (0.05*g*density*self.rad**2)/(6*np.pi*viscosity_coeff) # y component of terminal velocity  
-        
-        self.term_vel = np.array([0, -VTy, 0]) # negative comes from coordinate definition
-        
-    
-    # def terminal_vel(self, viscosity_coeff, fluid_density, g):
-    #     '''
-    #     Calculates velocity at t = 0 for each bacteria instance.
-        
-    #     :param viscosity_coeff: float, viscosity coefficient in PaS for liquid in sim.
-    #     :param fluid_density: float, density in kg/m^3 for the same liquid
-    #     :param object_density: float, density of object in clinostat, kg/m^3
-    #     :param g: float, gavitational constant in kg/m^2 for desired environment
-    #     '''   
-        
-    #     # density of object when assumed to be a sphere        
-    #     object_density = self.mass/(np.pi*(4/3)*self.rad**3) 
-    #     #print('vg object dens = ' + str(object_density))
-        
-    #     # bouyant mass of object
-    #     bm = self.mass*(1-(fluid_density/object_density))
-
-    #     # gravity acts in y direction therefore terminal velocity in y direction        
-    #     VTy = (bm*g)/(6*np.pi*viscosity_coeff*self.rad) 
-        
-    #     self.term_vel = np.array([0, -VTy, 0]) # negative comes from coordinate definition
-        
-    #     #print('vg = ' + str(np.linalg.norm(self.term_vel)))
+        self.term_vel = np.array([0, -VTy, 0]) # negative comes from coordinate definition, positive y goes up 
         
         
     def centripetal_force(self, viscosity_coeff, fluid_density, omega, planar_position, dt, status):
         '''
-        Calculates velocity due to centripetal force to offset the drag force.
+        Calculate velocity due to centripetal (fugal) force
         
         :param viscosity_coeff: float, viscosity coefficient in PaS for liquid in sim.
         :param fluid_density: float, density in kg/m^3 for the same liquid
@@ -121,32 +98,16 @@ class Bacteria3D(object):
         
         # centripetal force is on
         if status == 'True':
-        
-            # density of object when assumed to be a sphere        
-            #object_density = self.mass/(np.pi*(4/3)*self.rad**3) 
-            #print('vc object dens = ' + str(object_density))
             
-            # bouyant mass of object
-            #bm = self.mass*(1-(fluid_density/object_density))
-            #print('vc bm = ' + str(bm))
-    
-            #bm = 0.05*fluid_density*self.rad**3
-            
-            #bm = (4/3)*np.pi*fluid_density*(self.rad**3)*((1027/fluid_density) - 1)
-            bm = (4/3)*np.pi*fluid_density*(self.rad**3)*((self.organism_density/fluid_density) - 1)
-    
-            # centripetal force being offset by drag force
-            self.centripetal_vel = (bm*(omega**2)*planar_position)/(6*np.pi*viscosity_coeff*self.rad)
+            # viscously overdamped dynamics 
+            self.centripetal_vel = (self.bm*(omega**2)*planar_position)/(6*np.pi*viscosity_coeff*self.rad)
          
-        # centripetal force is off
+        # centripetal force is off thus set to zero
         elif status == 'False':
-            
             self.centripetal_vel = [0, 0, 0]
-            #print(self.centripetal_vel)
-            #print('vc = ' + str(np.linalg.norm(self.centripetal_vel)))
         
         
-    def rotational_vel(self, omega, dt):
+    def rotational_vel(self, omega):
         '''
         This function calculates the rotational velocity of the bacteria
         at its current position.
@@ -157,24 +118,6 @@ class Bacteria3D(object):
         y = self.pos[1] # current y position of bacteria
         
         self.rot_vel = np.array([-y*omega, x*omega, 0]) # updating the current rotational velocity of the bacteria 
-        
-        
-        
-        #print(np.linalg.norm(self.rot_vel))
-        
-    # def rotational_vel(self, omega, dt):
-        
-    #     x = self.pos[0]
-    #     y = self.pos[1]
-        
-    #     r = np.sqrt((x**2) + (y**2))
-        
-    #     theta = omega*dt
-        
-    #     x_new = r*np.cos(theta)
-    #     y_new = r*np.sin(theta)
-        
-    #     self.rot_vel = np.array([x_new, y_new, 0])/dt
     
     
     @staticmethod
@@ -316,7 +259,7 @@ class Bacteria3D(object):
         
         
     @staticmethod # meaning it could be written as an independant function 
-    def new_b3d(file_handle):
+    def new_b3d(file_handle, medium_density):
         """
         Initialises a Particle3D instance given an input file handle.
         
@@ -325,6 +268,7 @@ class Bacteria3D(object):
         <mass>  <radius>  <x> <y> <z>  <vs> 
         
         :param file_handle: Readable file handle in the above format
+        :param medium_density: float, density in kg/m^3 for the same liquid
         :return: Particle3D instance
         """
         data = file_handle.readline() # file_handle will contain information about bacteria
@@ -332,8 +276,8 @@ class Bacteria3D(object):
         
         mass = float(p[0]) # bacterial mass in kg
         radius = float(p[1]) # radius of bacteria in m
-        position = np.array([p[2],p[3],p[4]], float) # x,y,z component in m from origin
+        position = np.array([p[2] ,p[3] ,p[4]], float) # x,y,z component in m from origin
         swimming_vel = float(p[5]) # swimming velocity of bacteria in m/s
         organism_density = float(p[6])
 
-        return Bacteria3D(mass, position, radius, swimming_vel, organism_density) # instance of Bacteria3D class
+        return Bacteria3D(mass, position, radius, swimming_vel, organism_density, medium_density) # instance of Bacteria3D class

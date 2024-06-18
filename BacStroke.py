@@ -54,6 +54,8 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
     
     # 1. read input files #####################################################
     
+    # read config_file, obtain constants describing clinostat system
+    
     # opening config file containing all file paths needed to execute code
     file = open(config_file, "r")
     
@@ -67,23 +69,6 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
     # obtaining file names from config file
     inputfile_name = config[0]# input data file (containing becterium initial conditions)
     
-    # Determining length of inputfile = no. bacteria in system   
-    with open(inputfile_name, 'r') as fp:
-        lines = len(fp.readlines()) # no. bacteria present 
-        
-    fp.close() # close input file to ensure no mess or overwriting
-    
-    infile = open(inputfile_name, "r")# opening input file to use
-    print(infile)
-
-    bacteria = [] # will contain instances of Bacteria3D, i.e initial conditions of each bacterium
-    
-    # initialising bacteria instances
-    for i in range(lines):
-        bacteria.append(bac.new_b3d(infile))
-        
-    # DEFINING INITIAL CONDITIONS AND CONSTANTS OF CLINOSTAT SYSTEM ###########
-        
     # Time parmeters of simulation
     time = 0.0 # [s]
     dt = float(config[1]) # length of each timestep [s]
@@ -103,50 +88,63 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
     density = float(config[7]) # density of medium in clinostat [kg/m^3]
     g = float(config[8]) # acceleration due to gravity [m/s^2]
     
+    # coefficients
     rotational_diffusion_coefficient = float(config[9]) # inversely proportional to time it takes bacterium to forget direction its travelling in [1/s]
     viscosity_coefficient = float(config[10]) # viscosity coefficient of clinostat medium at room temp [Pa/s] (water during testing)
     diffusion_coefficient = float(config[11]) # diffusion coefficient for medium within clinostat at room temp [m^2/s]
 
     tumbling_rate = int(config[12]) # how often in a second a bacterium should tumble
     
-    centripetal_force_status = config[13]
+    centrifugal_force_status = config[13] # does the bacterial dynamics include centrifugal force?
     
-    # We now have a list of bacteria created as point particle instances from
-    # the bacteria3D class 
+    # read in information about intial state of bacteium (position etc...) from initial conditions file
+    
+    # Determining length of inputfile = no. bacteria in system   
+    with open(inputfile_name, 'r') as fp:
+        lines = len(fp.readlines()) # no. bacteria present 
+        
+    fp.close() # close input file to ensure no mess or overwriting
+    
+    infile = open(inputfile_name, "r")# opening input file to use
+    print(infile)
+
+    bacteria = [] # will contain instances of Bacteria3D, i.e initial conditions of each bacterium
+    
+    # initialising bacteria instances
+    for i in range(lines):
+        bacteria.append(bac.new_b3d(infile, density))
+        
     
     # 2. GENERATING INITIAL CONDITIONS ########################################
     
-    initial_positions = np.zeros([lines, 3])
+    initial_positions = np.zeros([lines, 3]) # array that records initial 3D position of bacteria in cartesian coords (XYZ)
     
-    # reading inital position of bacteria
+    # reading inital position of bacteria from initial conditions file
     for i in range(len(bacteria)):        
-            # Saving initial positions
-            initial_positions[i] = bacteria[i].pos
+        initial_positions[i] = bacteria[i].pos
 
     # Storage for data
     pos_array = np.zeros([lines, numstep, 3]) # xyz position of every bacteria every timestep
-    time_array = np.zeros(numstep)
-    tumble_array = np.zeros(numstep)
-    swim_direction = np.zeros([lines, numstep, 3])
+    time_array = np.zeros(numstep) 
+    tumble_array = np.zeros(numstep) # track if bacterium tumbles or not
+    swim_direction = np.zeros([lines, numstep, 3]) # track direction of bacteria swimming
     
-    # initialising velocity terms
+    # generate
     for i in range(lines):
-        bacteria[i].terminal_vel(viscosity_coefficient, density, g) # terminal velocity
-        #print('vg = ' + str(bacteria[i].terminal_vel))
-        bacteria[i].rotational_vel(omega, dt) # rotational velocity
+        bacteria[i].terminal_vel(viscosity_coefficient, density, g) # terminal velocity - remains a constant in the time integrator
+        bacteria[i].rotational_vel(omega) # rotational velocity
         
-        # initial planar position
+        # initial planar position (needed for rotational components of the velocity)
         x = initial_positions[i][0]
         y = initial_positions[i][1]
         planar_pos = np.array([x, y, 0])
         
-        bacteria[i].centripetal_force(viscosity_coefficient, density, omega, planar_pos, dt, centripetal_force_status) # centripetal velocity
+        bacteria[i].centripetal_force(viscosity_coefficient, density, omega, planar_pos, dt, centrifugal_force_status) # centrifugal velocity
         
-        bacteria[i].update_vel(dt, diffusion_coefficient) # !!! remove if this fix doesnt work
+        bacteria[i].update_vel(dt, diffusion_coefficient)
         
-        
-    
-    # 3. BEGINNING OF TIME INTEGRATION  #######################################
+
+    # 3. beginning of time integration  #######################################
     
     for i in range(numstep):  # Anything that happens per each timestep 
     
@@ -164,9 +162,9 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
             
             planar_pos = np.array([bacteria[j].pos[0], bacteria[j].pos[1], 0])
             #print('inner boundry, new planar magnitude is: ' + str(np.linalg.norm(planar_pos)))
-            bacteria[j].centripetal_force(viscosity_coefficient, density, omega, planar_pos, dt, centripetal_force_status)
+            bacteria[j].centripetal_force(viscosity_coefficient, density, omega, planar_pos, dt, centrifugal_force_status)
             
-            bacteria[j].rotational_vel(omega, dt)
+            bacteria[j].rotational_vel(omega)
             
             # updating velocity of each bacterium [m/s]
            # bacteria[j].update_vel(dt, diffusion_coefficient)
