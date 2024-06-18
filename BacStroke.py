@@ -32,9 +32,9 @@ import matplotlib as mpl
 
 # external files
 import Functions as f 
+from Bacteria3D import Bacteria3D as bac # class
 
-# class
-from Bacteria3D import Bacteria3D as bac
+# style sheet
 
 plt.rcParams.update({
     'text.usetex': False,
@@ -43,21 +43,18 @@ plt.rcParams.update({
 
 # #handle graph formatting and style
 plt.style.use('shendrukGroupStyle')
-#mpl.rcParams['image.cmap'] = 'viridis'
 import shendrukGroupFormat as ed
 MYLW=1.0 #line width
 
-#mpl.rcParams.update(mpl.rcParamsDefault)
-#random.seed(66)
+random.seed(66)
 
 ###############################################################################
 
 def main(config_file, output_file, tumble_file, time_file, swimming_file, figure_output_file):
     
-    # 1. FILE INITIALISING ####################################################
+    # 1. read input files #####################################################
     
     # opening config file containing all file paths needed to execute code
-    #config_file = 'test_config.txt' # path to config file
     file = open(config_file, "r")
     
     # reading every entry from configuration file (containing constants etc)
@@ -77,6 +74,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
     fp.close() # close input file to ensure no mess or overwriting
     
     infile = open(inputfile_name, "r")# opening input file to use
+    print(infile)
 
     bacteria = [] # will contain instances of Bacteria3D, i.e initial conditions of each bacterium
     
@@ -97,22 +95,21 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
     omega = clino_rotation_rate*2*np.pi/60 # converting rotation rate to angular velocity [rad/s]
     
     # clinostat parameters
-    R = float(config[4]) # radius of circular face of clinostat [m]
-    H = float(config[5]) # length of clinostat down the z axis [m]
-    r = 0.1E-2
+    R = float(config[4]) # outer radius of circular face of clinostat [m]
+    r = float(config[5]) # inner radius of circular face of clinostat [m]
+    H = float(config[6]) # length of clinostat down the z axis [m]
     
     # system constants
-    density = float(config[6]) # density of medium in clinostat [kg/m^3]
-    g = float(config[7]) # acceleration due to gravity [m/s^2]
+    density = float(config[7]) # density of medium in clinostat [kg/m^3]
+    g = float(config[8]) # acceleration due to gravity [m/s^2]
     
-    rotational_diffusion_coefficient = float(config[8]) # inversely proportional to time it takes bacterium to forget direction its travelling in [1/s]
-    viscosity_coefficient = float(config[9]) # viscosity coefficient of clinostat medium at room temp [Pa/s] (water during testing)
-    diffusion_coefficient = float(config[10]) # diffusion coefficient for medium within clinostat at room temp [m^2/s]
+    rotational_diffusion_coefficient = float(config[9]) # inversely proportional to time it takes bacterium to forget direction its travelling in [1/s]
+    viscosity_coefficient = float(config[10]) # viscosity coefficient of clinostat medium at room temp [Pa/s] (water during testing)
+    diffusion_coefficient = float(config[11]) # diffusion coefficient for medium within clinostat at room temp [m^2/s]
 
-    tumbling_rate = int(config[11]) # how often in a second a bacterium should tumble
+    tumbling_rate = int(config[12]) # how often in a second a bacterium should tumble
     
-    centripetal_force_status = config[12]
-    print(type(centripetal_force_status))
+    centripetal_force_status = config[13]
     
     # We now have a list of bacteria created as point particle instances from
     # the bacteria3D class 
@@ -155,7 +152,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
     
         
         # progress tracking for loop
-        print('Progress: ' + str(i+1) + ' out of ' + str(numstep))
+        #print('Progress: ' + str(i+1) + ' out of ' + str(numstep))
         
         time += dt # establishing current time in simulation
         time_array[i] = time # storing current time in simulation

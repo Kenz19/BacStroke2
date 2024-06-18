@@ -2,16 +2,19 @@
 Object_initial_conditions/Ecoli.txt
 
 # timestep (dt) of simulation [s] #
-0.000001
+0.01
 
 # simulation length [s] #
-1
+10
 
 # rotation rate of clinostat [RPM], 0 = no rotation #
 315
 
-# radius of clinostat [m], on circular face # 
+# outer radius of clinostat [m], on circular face # 
 1E-2
+
+# inner radius of clinostat [m], on circular face #
+0.1E-2
 
 # length of clinostat [m], length down z axis #
 1E-2
