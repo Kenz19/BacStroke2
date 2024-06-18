@@ -141,21 +141,21 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
         
         bacteria[i].centripetal_force(viscosity_coefficient, density, omega, planar_pos, dt, centrifugal_force_status) # centrifugal velocity
         
-        bacteria[i].update_vel(dt, diffusion_coefficient)
+        bacteria[i].update_vel(dt, diffusion_coefficient) # get intial velocity vector
         
 
     # 3. beginning of time integration  #######################################
     
     for i in range(numstep):  # Anything that happens per each timestep 
-    
+      
+        # text progress bar
+        if i%100 == 0:
+            print(f'Progress: {i} out of {numstep}')
         
-        # progress tracking for loop
-        #print('Progress: ' + str(i+1) + ' out of ' + str(numstep))
-        
-        time += dt # establishing current time in simulation
+        time += dt # add another timestep to current time
         time_array[i] = time # storing current time in simulation
         
-        for j in range(lines): # Anything for each particle
+        for j in range(lines): # Anything for each bacterium
   
             # radius of bacterium
             a = bacteria[j].rad
