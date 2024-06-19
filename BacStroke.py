@@ -46,25 +46,27 @@ plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 MYLW=1.0 #line width
 
-random.seed(66)
+#random.seed(66)
 
 ###############################################################################
 
-def main(config_file, output_file, tumble_file, time_file, swimming_file, figure_output_file):
+def main(config_file, output_file, figure_output_file):
     
     # 1. read input files #####################################################
     
     # read config_file, obtain constants describing clinostat system
     
-    # opening config file containing all file paths needed to execute code
-    file = open(config_file, "r")
+    # # opening config file containing all file paths needed to execute code
+    # file = open(config_file, "r")
     
-    # reading every entry from configuration file (containing constants etc)
-    config = file.readlines()[1::3]
+    # # reading every entry from configuration file (containing constants etc)
+    # config = file.readlines()[1::3]
     
-    # removing trailing new line (\n)
-    for i in range(len(config)):
-        config[i] = config[i].rstrip()
+    # # removing trailing new line (\n)
+    # for i in range(len(config)):
+    #     config[i] = config[i].rstrip()
+    
+    config = f.read_config(config_file)
     
     # obtaining file names from config file
     inputfile_name = config[0]# input data file (containing becterium initial conditions)
@@ -97,7 +99,8 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
     
     centrifugal_force_status = config[13] # does the bacterial dynamics include centrifugal force?
     boundry_conditions = config[14]
-    print(boundry_conditions)
+
+    output_interval = int(config[15])
     # read in information about intial state of bacteium (position etc...) from initial conditions file
     
     # Determining length of inputfile = no. bacteria in system   
@@ -125,8 +128,8 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
         initial_positions[i] = bacteria[i].pos
 
     # Storage for data
-    pos_array = np.zeros([lines, numstep, 3]) # xyz position of every bacteria every timestep
-    time_array = np.zeros(numstep) 
+    output_array = np.zeros([lines, int(numstep/output_interval) + 1, 4]) # xyz position of every bacteria every timestep
+    #time_array = np.zeros(numstep) 
     #tumble_array = np.zeros(numstep) # track if bacterium tumbles or not
     #swim_direction = np.zeros([lines, numstep, 3]) # track direction of bacteria swimming
     
@@ -154,7 +157,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
             print(f'Progress: {i} out of {numstep}')
         
         time += dt # add another timestep to current time
-        time_array[i] = time # storing current time in simulation
+        #time_array[i] = time # storing current time in simulation
         
         # update the position of the bacterium
         for j in range(lines): # Anything for each bacterium
@@ -174,7 +177,6 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
             # updating velocity of each bacterium [m/s]
             bacteria[j].update_vel(dt, diffusion_coefficient)
 
-            
             # boundary conditions (x & y)
             
             #position on a 2D circle (set z = 0)
@@ -237,7 +239,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
                         
                         # updating z position and re-recording the position
                         bacteria[j].pos[2] = H - (2*a)
-                        pos_array[j, i] = bacteria[j].pos # record corrected z position
+                        #pos_array[j, i] = bacteria[j].pos # record corrected z position
                         
                         # stop bacterium moving in z direction in next timestep
                         bacteria[j].vel[2] *= 0
@@ -247,7 +249,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
                         
                         # updating z position and re-recording the position
                         bacteria[j].pos[2] = 0 + (2*a)
-                        pos_array[j, i] = bacteria[j].pos
+                        #pos_array[j, i] = bacteria[j].pos
                         
                         # stop bacterium moving in z direction in next timestep
                         bacteria[j].vel[2] *= 0
@@ -295,7 +297,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
                         
                         # updating z position and re-recording the position
                         bacteria[j].pos[2] = H - (2*a)
-                        pos_array[j, i] = bacteria[j].pos
+                        #pos_array[j, i] = bacteria[j].pos
                         
                         bacteria[j].vel[2] *= 0 #set z velocity to 0
                     
@@ -304,7 +306,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
                         
                         # updating z position and re-recording the position
                         bacteria[j].pos[2] = 0 + (2*a)
-                        pos_array[j, i] = bacteria[j].pos
+                        #pos_array[j, i] = bacteria[j].pos
                         
                         # setting z velocity to be 0, therefore velocity only in xy plane
                         bacteria[j].vel[2] *= 0
@@ -314,7 +316,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
                     
                    # updating z position and re-recording the position
                    bacteria[j].pos[2] = H - (2*a)
-                   pos_array[j, i] = bacteria[j].pos
+                   #pos_array[j, i] = bacteria[j].pos
                    
                    bacteria[j].vel[2] *= 0
                  
@@ -323,7 +325,7 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
                     
                     # updating z position and re-recording the position
                     bacteria[j].pos[2] = 0 + (2*a)
-                    pos_array[j, i] = bacteria[j].pos
+                    #pos_array[j, i] = bacteria[j].pos
                     
                     bacteria[j].vel[2] *= 0
                     
@@ -337,13 +339,17 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
                     bacteria[j].update_swimming_vel(omega, rotational_diffusion_coefficient, dt, tumble) # updating swimming velocity
                     #swim_direction[j, i] = bacteria[j].swim_direction # saving swimming direction
            
-            
-           
-            #bacteria[j].rotational_vel(omega)
-           
             # record position after all relevant conditions applied
-            pos_array[j, i] = bacteria[j].pos
+            #output_array[j, i] = np.array([bacteria[j].pos[0], bacteria[j].pos[1], bacteria[j].pos[2], time])
             
+            # write every third position and time to file
+            if i%output_interval == 0:
+                print(i)
+                #output_index = i // 3  # Adjust the index to write every third position
+                #print(output_index)
+                output_array[j, int(i/output_interval)] = np.array([bacteria[j].pos[0], bacteria[j].pos[1], bacteria[j].pos[2], time])
+                print(output_array)
+                
             # # get planar positions
             # x = pos_array[j, i][0]
             # y = pos_array[j, i][1]
@@ -353,76 +359,75 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
             #if np.linalg.norm(planar_pos) > 0.05:
                 #print(np.linalg.norm(planar_pos))
             #print(pos_array[j, i])
-          
-           # if statement for inner boundry conditions, including the same thing about the z conditions 
     
-    #pos_array[0] = pos_array[0][::100]
+
     # saving parameters to output file
-    np.savetxt(output_file, pos_array[0], delimiter=",")
+    np.savetxt(output_file, output_array[0], delimiter = ",")
     #np.savetxt(tumble_file, tumble_array, delimiter=",")
-    np.savetxt(time_file, time_array, delimiter=",") # outputting time for ease of analysis
+    #np.savetxt(time_file, time_array, delimiter=",") # outputting time for ease of analysis
     #np.savetxt(swimming_file, swim_direction[0], delimiter = ",")
+    
     # 4. PLOTTING ################################################################
             
     # plotting path of bacteria
-    nopoints = 50
+    # nopoints = 50
     
-    x_coords = pos_array[0,:,0]
-    y_coords = pos_array[0,:,1]
-    z_coords = pos_array[0,:,2]
+    # # x_coords = pos_array[0,:,0]
+    # # y_coords = pos_array[0,:,1]
+    # # z_coords = pos_array[0,:,2]
     
     
-    # fig, ax = plt.subplots(figsize=(10, 10))
-    # # cir = plt.Circle((0, 0), R, facecolor='#c7c7c7', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
-    # # ax.add_patch(cir)
-    # # cir2 = plt.Circle((0, 0), r, facecolor='white', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
-    # # ax.add_patch(cir2)
-    # ax.scatter(x_coords[::nopoints], y_coords[::nopoints], s = 15, c = 'navy')
-    # ax.set_xlabel('x (m)')#, fontsize = 30)
-    # ax.set_ylabel('y (m)')#, fontsize = 30)
-    # ax.tick_params(axis='x')#, labelsize=20)
-    # ax.tick_params(axis='y')#, labelsize=20)
-    # fig.suptitle('Diffusion', fontsize = 40)
+    # # fig, ax = plt.subplots(figsize=(10, 10))
+    # # # cir = plt.Circle((0, 0), R, facecolor='#c7c7c7', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
+    # # # ax.add_patch(cir)
+    # # # cir2 = plt.Circle((0, 0), r, facecolor='white', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
+    # # # ax.add_patch(cir2)
+    # # ax.scatter(x_coords[::nopoints], y_coords[::nopoints], s = 15, c = 'navy')
+    # # ax.set_xlabel('x (m)')#, fontsize = 30)
+    # # ax.set_ylabel('y (m)')#, fontsize = 30)
+    # # ax.tick_params(axis='x')#, labelsize=20)
+    # # ax.tick_params(axis='y')#, labelsize=20)
+    # # fig.suptitle('Diffusion', fontsize = 40)
+    # # plt.show()
+    # # ax = fig.add_subplot(projection='3d')
+    # # ax.set_xlabel('x (m)')
+    # # ax.set_ylabel('y (m)')
+    
+    # #ax.scatter(x_coords[::nopoints], z_coords[::nopoints], y_coords[::nopoints])
     # plt.show()
-    # ax = fig.add_subplot(projection='3d')
-    # ax.set_xlabel('x (m)')
-    # ax.set_ylabel('y (m)')
     
-    #ax.scatter(x_coords[::nopoints], z_coords[::nopoints], y_coords[::nopoints])
-    plt.show()
+    # fig,ax = plt.subplots(1,4, figsize = (35,12))
+    # ax[0].scatter(x_coords[::nopoints], z_coords[::nopoints], s=10, label = 'Bacteria 1')
+    # ax[0].set_xlabel('x')#, fontsize = 30)
+    # ax[0].set_ylabel('z')#, fontsize = 30)
+    # ax[0].tick_params(axis='x')#, labelsize = 20)
+    # ax[0].tick_params(axis='y')#, labelsize=20)
+    # #ax[0].legend()
     
-    fig,ax = plt.subplots(1,4, figsize = (35,12))
-    ax[0].scatter(x_coords[::nopoints], z_coords[::nopoints], s=10, label = 'Bacteria 1')
-    ax[0].set_xlabel('x')#, fontsize = 30)
-    ax[0].set_ylabel('z')#, fontsize = 30)
-    ax[0].tick_params(axis='x')#, labelsize = 20)
-    ax[0].tick_params(axis='y')#, labelsize=20)
-    #ax[0].legend()
-    
-    # view of circular face of clinostat
-    cir = plt.Circle((0, 0), R, facecolor='#c7c7c7', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
-    ax[1].add_patch(cir)
-    cir2 = plt.Circle((0, 0), r, facecolor='white', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
-    ax[1].add_patch(cir2)
-    ax[1].plot(x_coords[::nopoints], y_coords[::nopoints], 'o',  zorder = 1, label = 'Bacteria 1')
-    ax[1].set_xlabel('x')#, fontsize = 30)
-    ax[1].set_ylabel('y')#, fontsize = 30)
-    ax[1].tick_params(axis='x')#, labelsize=20)
-    ax[1].tick_params(axis='y')#, labelsize=20)
+    # # view of circular face of clinostat
+    # cir = plt.Circle((0, 0), R, facecolor='#c7c7c7', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
+    # ax[1].add_patch(cir)
+    # cir2 = plt.Circle((0, 0), r, facecolor='white', alpha=1, linewidth=3, linestyle='--', edgecolor='black')#color='darkorange',fill=False)
+    # ax[1].add_patch(cir2)
+    # ax[1].plot(x_coords[::nopoints], y_coords[::nopoints], 'o',  zorder = 1, label = 'Bacteria 1')
+    # ax[1].set_xlabel('x')#, fontsize = 30)
+    # ax[1].set_ylabel('y')#, fontsize = 30)
+    # ax[1].tick_params(axis='x')#, labelsize=20)
+    # ax[1].tick_params(axis='y')#, labelsize=20)
 
-    # plotting y position against time
-    # ax[2].scatter(time_array[::10]/1e2, x_coords[::10], s = 5, label = 'Bacteria 1')
-    ax[2].plot(time_array[::nopoints]/1e2, y_coords[::nopoints], 'o', label = 'Bacteria 1')
-    ax[2].set_xlabel('t ($10^2$s)')#, fontsize = 30)
-    ax[2].set_ylabel('y')#, fontsize = 30)
-    ax[2].tick_params(axis='x')#, labelsize=20)
-    ax[2].tick_params(axis='y')#, labelsize=20)
+    # # plotting y position against time
+    # # ax[2].scatter(time_array[::10]/1e2, x_coords[::10], s = 5, label = 'Bacteria 1')
+    # ax[2].plot(time_array[::nopoints]/1e2, y_coords[::nopoints], 'o', label = 'Bacteria 1')
+    # ax[2].set_xlabel('t ($10^2$s)')#, fontsize = 30)
+    # ax[2].set_ylabel('y')#, fontsize = 30)
+    # ax[2].tick_params(axis='x')#, labelsize=20)
+    # ax[2].tick_params(axis='y')#, labelsize=20)
     
-    ax[3].scatter(time_array[::nopoints]/1e2, np.sqrt(y_coords[::nopoints]**2 + x_coords[::nopoints]**2))
+    # ax[3].scatter(time_array[::nopoints]/1e2, np.sqrt(y_coords[::nopoints]**2 + x_coords[::nopoints]**2))
     
-    fig.suptitle('Sim length = ' + str(total_time) + 's' + ', $\Delta$t = ' + str(dt) + 's' + ', RPM = ' + str(clino_rotation_rate), fontsize=30)
-    #plt.savefig(figure_output_file, dpi = 300)
-    plt.show()
+    # fig.suptitle('Sim length = ' + str(total_time) + 's' + ', $\Delta$t = ' + str(dt) + 's' + ', RPM = ' + str(clino_rotation_rate), fontsize=30)
+    # #plt.savefig(figure_output_file, dpi = 300)
+    # plt.show()
     
     #print(0.5E-6 + 2.001E-3)
     
@@ -431,10 +436,4 @@ def main(config_file, output_file, tumble_file, time_file, swimming_file, figure
 # Execute main method, but only when directly invoked
 if __name__ == "__main__":
     
-    config = 'Swimming'
-    
-    output_file = f"D:\MPhys\ExpData\AdditionalData\Varying_configurations\Data\{config}\positions.csv"
-    time_file = f"D:/MPhys/ExpData/AdditionalData/Varying_configurations/Data/{config}/time.csv"
-    figure_output = f"D:\MPhys\ExpData\AdditionalData\Varying_configurations\Data\{config}\trajectory.png"
-    
-    main('test_config.txt', 'bacpos.csv', 'tumbles.csv', 'time.csv', 'swimming_direction.csv', 'traj.png')
+    main('test_config.txt', 'output.csv', 'traj.png')

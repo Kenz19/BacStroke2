@@ -484,6 +484,34 @@ def steady_state_time(y, no_pos, time_path):
     
     return ind
 
+
+def read_config(config_path):
+    '''
+    Generates an array of the constants contained within the configuration file. 
+
+    Parameters
+    ----------
+    config_path : string
+        path to configuration file
+
+    Returns
+    -------
+    config : Numpy array
+        constants read from config file
+
+    '''
+    # opening config file containing all file paths needed to execute code
+    file = open(config_path, "r")
+    
+    # reading every entry from configuration file (containing constants etc)
+    config = file.readlines()[1::3]
+    
+    # removing trailing new line (\n)
+    for i in range(len(config)):
+        config[i] = config[i].rstrip()
+        
+    return config
+
     
     
     

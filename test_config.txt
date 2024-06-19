@@ -42,3 +42,6 @@ True
 
 # are boundary conditions present? #
 True
+
+# how often should position and time data be output? #
+3
