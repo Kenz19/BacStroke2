@@ -22,7 +22,7 @@ plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 
 # read in output file
-df = np.array(pd.read_csv('output.csv', sep=',', header = None))
+df = np.array(pd.read_csv('output.csv', sep = ',', header = None))
 #print(df)
 
 # y positions
@@ -46,6 +46,8 @@ bin_width = np.abs(bin_edges[0] - bin_edges[1])
 bin_centres = bin_edges[:-1] + 0.5*bin_width
 
 plt.scatter(bin_centres, hist)
+plt.xscale('log')
+plt.yscale('log')
 plt.xlabel('Height, h (m)')
 plt.ylabel('PDF(h)')
 

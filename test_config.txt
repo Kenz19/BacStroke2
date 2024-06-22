@@ -2,7 +2,7 @@
 Object_initial_conditions/Ecoli.txt
 
 # timestep (dt) of simulation [s] #
-1
+0.1
 
 # simulation length [s] #
 1000000
@@ -23,7 +23,7 @@ Object_initial_conditions/Ecoli.txt
 1000
 
 # acceleration due to gravity [m/s^2], 0 = no gravity # 
-9.8
+29.4
 
 # rotational diffusion coefficient [1/s] #
 0.15

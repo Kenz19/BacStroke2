@@ -50,7 +50,7 @@ random.seed(66)
 
 ###############################################################################
 
-def main(config_file, output_file, figure_output_file):
+def main(config_file, output_file):
     
     # 1. read input files #####################################################
     
@@ -366,4 +366,4 @@ def main(config_file, output_file, figure_output_file):
 # Execute main method, but only when directly invoked
 if __name__ == "__main__":
     
-    main('test_config.txt', 'output.csv', 'traj.png')
+    main('test_config.txt', 'output.csv')
