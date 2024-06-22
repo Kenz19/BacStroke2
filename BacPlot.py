@@ -37,7 +37,7 @@ y_coords = df[:, 1]
 z_coords = df[:, 2]
 time = df[:, 3]
 
-fig, ax = plt.subplots(1, 3, figsize = (18, 6), sharey = True)
+fig, ax = plt.subplots(1, 3, figsize = (18, 6.5), sharey = True) # 18 6.5 gives square look for the panels
 
 # first panel y v z positional coordinates
 ax[0].scatter(z_coords, y_coords)

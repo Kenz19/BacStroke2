@@ -2,13 +2,13 @@
 Object_initial_conditions/Ecoli.txt
 
 # timestep (dt) of simulation [s] #
-0.01
+1
 
 # simulation length [s] #
-10
+1000000
 
 # rotation rate of clinostat [RPM], 0 = no rotation #
-315
+0
 
 # outer radius of clinostat [m], on circular face # 
 1E-2
@@ -23,7 +23,7 @@ Object_initial_conditions/Ecoli.txt
 1000
 
 # acceleration due to gravity [m/s^2], 0 = no gravity # 
-0
+9.8
 
 # rotational diffusion coefficient [1/s] #
 0.15
@@ -44,4 +44,4 @@ True
 True
 
 # how often should position and time data be output? #
-3
+10
