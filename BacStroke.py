@@ -35,7 +35,6 @@ import Functions as f
 from Bacteria3D import Bacteria3D as bac # class
 
 # style sheet
-
 plt.rcParams.update({
     'text.usetex': False,
     'font.family': 'roman',
@@ -46,7 +45,7 @@ plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 MYLW=1.0 #line width
 
-random.seed(66)
+#random.seed(66)
 
 ###############################################################################
 
@@ -128,7 +127,7 @@ def main(config_file, output_file):
         initial_positions[i] = bacteria[i].pos
 
     # Storage for data
-    output_array = np.zeros([lines, int(numstep/output_interval) + 1, 4]) # xyz position of every bacteria every timestep
+    output_array = np.zeros([lines, int(numstep/output_interval), 4]) # xyz position of every bacteria every timestep
     #time_array = np.zeros(numstep) 
     #tumble_array = np.zeros(numstep) # track if bacterium tumbles or not
     #swim_direction = np.zeros([lines, numstep, 3]) # track direction of bacteria swimming
@@ -152,6 +151,7 @@ def main(config_file, output_file):
     
     for i in range(numstep):  # Anything that happens per each timestep 
       
+        #print()
         # text progress bar
         if i%100 == 0:
             print(f'Progress: {i} out of {numstep}')
@@ -164,6 +164,7 @@ def main(config_file, output_file):
   
             # radius of bacterium
             a = bacteria[j].rad
+            #print(bacteria[j].bm)
             
             # update the centrifugal and rotational components of the velocity with bacteriums new position
             planar_pos = np.array([bacteria[j].pos[0], bacteria[j].pos[1], 0]) # 2D position vector of bacterium WRT centre of the clinostat
@@ -342,7 +343,7 @@ def main(config_file, output_file):
             # record position after all relevant conditions applied
             #output_array[j, i] = np.array([bacteria[j].pos[0], bacteria[j].pos[1], bacteria[j].pos[2], time])
             
-            # write every third position and time to file
+            # write every nth position and time to file
             if i%output_interval == 0:
 
                 output_array[j, int(i/output_interval)] = np.array([bacteria[j].pos[0], bacteria[j].pos[1], bacteria[j].pos[2], time])

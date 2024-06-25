@@ -21,7 +21,7 @@ plt.rcParams.update({
 plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 
-def plot_histogram(data, no_bins = 10, ylog = True, xlog = True, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png'):
+def plot_histogram(data, R, r, no_bins = 10, ylog = True, xlog = True, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png'):
     '''
     Display histogram of selected data set
     
@@ -41,13 +41,16 @@ def plot_histogram(data, no_bins = 10, ylog = True, xlog = True, xlabel = 'Heigh
             where the histrogram should be saved and output to
     '''
     
-    hist, bin_edges = np.histogram(h, bins = no_bins, density = True)
+    hist, bin_edges = np.histogram(h, bins = no_bins, density = True)  
     
     bin_width = np.abs(bin_edges[0] - bin_edges[1])
     
     bin_centres = bin_edges[:-1] + 0.5*bin_width
     
-    plt.scatter(bin_centres, hist)
+    # area of each bin (need to take away inner circle)
+    #areas = Ah(bin_edges, R, r)
+    
+    plt.scatter(bin_centres, hist)#/areas)
     
     if ylog == True:
         plt.yscale('log')
@@ -59,7 +62,26 @@ def plot_histogram(data, no_bins = 10, ylog = True, xlog = True, xlabel = 'Heigh
     plt.ylabel(ylabel)
     
     plt.savefig(output, dpi = 300)
+    
 
+# def Ah(bin_edges, R, r):
+#     '''
+#     get area between bin edges 
+#     '''
+#     # area between h = 0 and h = h' - are negative???
+    
+#     print(bin_edges, R)
+#     areas = ((R**2)*np.arcsin((bin_edges - R)/R)) + ((R*(bin_edges - R))*np.sqrt(1 - (bin_edges - R)/R)**2)
+#     print(areas)
+    
+#     #print(((r**2)*np.arcsin((bin_edges - r)/r)) + ((r*(bin_edges - r))*np.sqrt(1 - (bin_edges - r)/r)**2))
+    
+#     # area encompassed by each bin (A(h1) - A(h2))
+#     bin_areas = np.diff(areas)
+#     print(bin_areas)
+    
+#     return bin_areas
+    
 # read in output file
 df = np.array(pd.read_csv('output.csv', sep = ',', header = None))
 #print(df)
@@ -71,11 +93,12 @@ y = df[:, 1]
 constants = f.read_config('test_config.txt')
 
 R = float(constants[4]) # clinostat radius
+r = float(constants[5]) # inner clinostat radius
 
 # reference point is -R 
 h = y + R # changes from x = 0 to x = R as reference point, i.e height is main measurement
 
 # plot the histogram and save output
-plot_histogram(h, ylog = True, xlog = True, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png')
+plot_histogram(h, R = R, r = r, ylog = True, xlog = False, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png')
 
 

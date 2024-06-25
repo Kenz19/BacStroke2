@@ -2,10 +2,10 @@
 Object_initial_conditions/Ecoli.txt
 
 # timestep (dt) of simulation [s] #
-0.1
+100
 
 # simulation length [s] #
-1000000
+1000000000
 
 # rotation rate of clinostat [RPM], 0 = no rotation #
 0
@@ -23,7 +23,7 @@ Object_initial_conditions/Ecoli.txt
 1000
 
 # acceleration due to gravity [m/s^2], 0 = no gravity # 
-29.4
+0.98
 
 # rotational diffusion coefficient [1/s] #
 0.15
