@@ -5,7 +5,7 @@ Object_initial_conditions/Ecoli.txt
 100
 
 # simulation length [s] #
-1000000000
+100000000
 
 # rotation rate of clinostat [RPM], 0 = no rotation #
 0

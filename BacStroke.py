@@ -153,7 +153,7 @@ def main(config_file, output_file):
       
         #print()
         # text progress bar
-        if i%100 == 0:
+        if i%10000 == 0:
             print(f'Progress: {i} out of {numstep}')
         
         time += dt # add another timestep to current time
