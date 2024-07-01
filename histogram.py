@@ -58,21 +58,21 @@ def plot_histogram(data, R, r, no_bins = 10, ylog = True, xlog = True, xlabel = 
     # area of each bin (need to take away inner circle)
     #areas = Ah(bin_edges, R, r)
     
-    #return hist, bin_centres
+    return hist, bin_centres
     
-    plt.scatter(bin_centres, hist)#/areas)
-    #plt.scatter(bin_centres, np.exp(-bin_centres/H))
+    # plt.scatter(bin_centres, hist)#/areas)
+    # #plt.scatter(bin_centres, np.exp(-bin_centres/H))
     
-    if ylog == True:
-        plt.yscale('log')
+    # if ylog == True:
+    #     plt.yscale('log')
         
-    if xlog == True:
-        plt.xscale('log')
+    # if xlog == True:
+    #     plt.xscale('log')
         
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
+    # plt.xlabel(xlabel)
+    # plt.ylabel(ylabel)
     
-    plt.savefig(output, dpi = 300)
+    # plt.savefig(output, dpi = 300)
     
 
 # def Ah(bin_edges, R, r):
