@@ -21,7 +21,7 @@ plt.rcParams.update({
 plt.style.use('shendrukGroupStyle')
 import shendrukGroupFormat as ed
 
-def plot_histogram(data, R, r, no_bins = 10, ylog = True, xlog = True, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png'):
+def histogram(data, no_bins = 10, ylog = True, xlog = True, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png'):
     '''
     Display histogram of selected data set
     
@@ -59,20 +59,91 @@ def plot_histogram(data, R, r, no_bins = 10, ylog = True, xlog = True, xlabel = 
     #areas = Ah(bin_edges, R, r)
     
     return hist, bin_centres
+
+
+def plot_histogram(hist, bin_centres, output, ylog = True, xlog = False, xlabel = 'Height, h (m)', ylabel = 'PDF(h)'):
+    '''
+    Display histogram of selected data set
     
-    # plt.scatter(bin_centres, hist)#/areas)
-    # #plt.scatter(bin_centres, np.exp(-bin_centres/H))
+    :param hist: array
+            PDF values of data set
+    :param bin_centres: float
+            centres of bins corresponding to PDF values
+    :param ylog: boolean
+            should the yscale be log?
+    :param xlog: boolean
+            should the xscale be log?
+    :param xlabel: string
+            x axis label
+    :param ylabel: string
+            y axis label
+    :param output: string
+            where the histrogram should be saved and output to
+
+    '''
     
-    # if ylog == True:
-    #     plt.yscale('log')
+    # plot the histogram as a scatter plot
+    plt.scatter(bin_centres, hist)
+    
+    if ylog == True:
+        plt.yscale('log')
         
-    # if xlog == True:
-    #     plt.xscale('log')
+    if xlog == True:
+        plt.xscale('log')
         
-    # plt.xlabel(xlabel)
-    # plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     
-    # plt.savefig(output, dpi = 300)
+    plt.savefig(output, dpi = 300)
+    
+
+def steady_state_single_Y(data_path, config_path):
+    '''
+    Intake an output data set from BacStroke and its corresponding config file,
+    the y data is isolated and steady state y positions are output.
+
+    Parameters
+    ----------
+    data_path : string
+        Absolute path to a BacStroke output file.
+    config_path : string
+        Absolute path to the corresponding BacStroke configuration file.
+
+    Returns
+    -------
+    y values of the BacStroke output file in the steady state.
+
+    '''
+    
+    # config constants
+    constants = f.read_config(config_path)
+    dt = int(constants[1]) # timestep
+    T = int(constants[2]) # total sim time
+    output_interval = int(constants[-1]) # interval between positional readout
+    
+    # how many data points were output in each sim? (avoids prematurely opening a file and reading no. lines)
+    no_data_points = int((T/dt)/output_interval)
+    
+    # read in output from bacstroke
+    df = np.array(pd.read_csv(data_path, sep=',', header = None))
+    
+    # grab y vals - store
+    y = df[:, 1]
+    
+    # index marking back 90% of data points
+    ind90 = int((no_data_points/100)*90)
+    
+    # mean and standard deviation of the back end of the data
+    mean90 = np.mean(y[ind90:])
+    stddev90 = np.abs(np.std(y[ind90:]))
+    
+    # find which points are close to the cut off line within a standard deviation
+    mask = np.isclose(mean90, y, atol = stddev90)
+    
+    # find first instance where data comes close to ss
+    ind_ss = np.argmax(mask)
+    
+    return y[ind_ss:] # y values in the steady state
     
 
 # def Ah(bin_edges, R, r):
