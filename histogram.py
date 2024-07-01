@@ -41,7 +41,15 @@ def plot_histogram(data, R, r, no_bins = 10, ylog = True, xlog = True, xlabel = 
             where the histrogram should be saved and output to
     '''
     
-    hist, bin_edges = np.histogram(h, bins = no_bins, density = True)  
+    # g = 0.0
+
+    # bm = 1.1309733552923218e-16 # kg
+
+    # kT = 4.11e-21 # J
+
+    # H = kT/(bm*g)
+    
+    hist, bin_edges = np.histogram(data, bins = no_bins, density = True)  
     
     bin_width = np.abs(bin_edges[0] - bin_edges[1])
     
@@ -50,7 +58,10 @@ def plot_histogram(data, R, r, no_bins = 10, ylog = True, xlog = True, xlabel = 
     # area of each bin (need to take away inner circle)
     #areas = Ah(bin_edges, R, r)
     
+    #return hist, bin_centres
+    
     plt.scatter(bin_centres, hist)#/areas)
+    #plt.scatter(bin_centres, np.exp(-bin_centres/H))
     
     if ylog == True:
         plt.yscale('log')
@@ -82,23 +93,23 @@ def plot_histogram(data, R, r, no_bins = 10, ylog = True, xlog = True, xlabel = 
     
 #     return bin_areas
     
-# read in output file
-df = np.array(pd.read_csv('output.csv', sep = ',', header = None))
-#print(df)
+# # read in output file
+# df = np.array(pd.read_csv('output.csv', sep = ',', header = None))
+# #print(df)
 
-# y positions
-y = df[:, 1]
+# # y positions
+# y = df[:, 1]
 
-# read in the config file
-constants = f.read_config('test_config.txt')
+# # read in the config file
+# constants = f.read_config('test_config.txt')
 
-R = float(constants[4]) # clinostat radius
-r = float(constants[5]) # inner clinostat radius
+# R = float(constants[4]) # clinostat radius
+# r = float(constants[5]) # inner clinostat radius
 
-# reference point is -R 
-h = y + R # changes from x = 0 to x = R as reference point, i.e height is main measurement
+# # reference point is -R 
+# h = y + R # changes from x = 0 to x = R as reference point, i.e height is main measurement
 
-# plot the histogram and save output
-plot_histogram(h, R = R, r = r, ylog = True, xlog = False, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png')
+# # plot the histogram and save output
+# plot_histogram(h, R = R, r = r, ylog = True, xlog = False, xlabel = 'Height, h (m)', ylabel = 'PDF(h)', output = 'histogram.png')
 
 
