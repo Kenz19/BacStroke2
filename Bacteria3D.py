@@ -65,6 +65,7 @@ class Bacteria3D(object):
         
         # bouyant mass assuming a spherical bacterium of constant density 
         self.bm = (4/3)*np.pi*medium_density*(self.rad**3)*((self.organism_density/medium_density) - 1)
+        print(self.bm)
         
     
     # storing old terminal velocity just in case needed
@@ -81,8 +82,10 @@ class Bacteria3D(object):
         '''   
         
         VTy = self.bm*g/(6*np.pi*viscosity_coeff*self.rad) # magnitude of terminal velocity
+        #print(VTy)
         
         self.term_vel = np.array([0, -VTy, 0]) # negative comes from coordinate definition, positive y goes up 
+        print(self.term_vel)
         
         
     def centripetal_force(self, viscosity_coeff, fluid_density, omega, planar_position, dt, status):
@@ -241,6 +244,7 @@ class Bacteria3D(object):
         diffusion = noise*np.sqrt(2*diffusion_coefficient/dt)
         
         self.vel = self.term_vel + diffusion + self.rot_vel + self.swim*self.swim_direction + self.centripetal_vel
+        #print(self.term_vel)
        # print(self.vel, self.term_vel, diffusion, self.rot_vel, self.swim*self.swim_direction, self.centripetal_vel)
         
         #print(np.linalg.norm(0.5*self.mass*(self.vel**2)))

@@ -41,22 +41,11 @@ def histogram(data, no_bins = 10, ylog = True, xlog = True, xlabel = 'Height, h 
             where the histrogram should be saved and output to
     '''
     
-    # g = 0.0
-
-    # bm = 1.1309733552923218e-16 # kg
-
-    # kT = 4.11e-21 # J
-
-    # H = kT/(bm*g)
-    
     hist, bin_edges = np.histogram(data, bins = no_bins, density = True)  
     
     bin_width = np.abs(bin_edges[0] - bin_edges[1])
     
     bin_centres = bin_edges[:-1] + 0.5*bin_width
-    
-    # area of each bin (need to take away inner circle)
-    #areas = Ah(bin_edges, R, r)
     
     return hist, bin_centres
 

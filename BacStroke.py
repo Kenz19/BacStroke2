@@ -88,6 +88,7 @@ def main(config_file, output_file):
     # system constants
     density = float(config[7]) # density of medium in clinostat [kg/m^3]
     g = float(config[8]) # acceleration due to gravity [m/s^2]
+    print(g)
     
     # coefficients
     rotational_diffusion_coefficient = float(config[9]) # inversely proportional to time it takes bacterium to forget direction its travelling in [1/s]
@@ -151,9 +152,10 @@ def main(config_file, output_file):
     
     for i in range(numstep):  # Anything that happens per each timestep 
       
+        
         #print()
         # text progress bar
-        if i%10000 == 0:
+        if i%1000 == 0:
             print(f'Progress: {i} out of {numstep}')
         
         time += dt # add another timestep to current time
@@ -367,4 +369,4 @@ def main(config_file, output_file):
 # Execute main method, but only when directly invoked
 if __name__ == "__main__":
     
-    main('test_config.txt', 'output.csv')
+    main('C:/Users/kenzi/Documents/Masters/Summer/test_config.txt', 'output.csv')

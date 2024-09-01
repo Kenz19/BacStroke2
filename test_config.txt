@@ -2,13 +2,13 @@
 Object_initial_conditions/Ecoli.txt
 
 # timestep (dt) of simulation [s] #
-100
+0.0001
 
 # simulation length [s] #
-100000000
+1000
 
 # rotation rate of clinostat [RPM], 0 = no rotation #
-0
+0.95492965964254
 
 # outer radius of clinostat [m], on circular face # 
 1E-2
@@ -22,8 +22,8 @@ Object_initial_conditions/Ecoli.txt
 # density of medium within clinostat [kg/m^3] #
 1000
 
-# acceleration due to gravity [m/s^2], 0 = no gravity # 
-0.98
+# acceleration due to gravity [m/s^2], 0 = no gravity #
+9.8
 
 # rotational diffusion coefficient [1/s] #
 0.15
@@ -32,16 +32,16 @@ Object_initial_conditions/Ecoli.txt
 1E-3
 
 # diffusion coefficient of medium at room temperature [m^2/s], 0 = no diffusion 2e-13#
-2e-13
+0
 
 # bacteriums tumbling rate [1/s] #
-1
+0
 
 # is centripetal force on? True = yes, False = no # 
-True
+False
 
 # are boundary conditions present? #
 True
 
 # how often should position and time data be output? #
-10
+1000
